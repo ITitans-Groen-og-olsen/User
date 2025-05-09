@@ -10,4 +10,5 @@ public interface IUserDBRepository
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<User> UpdateUserAsync(string id, User updatedUser);
     Task<bool> DeleteUserAsync(string id);
+    Task<bool> Login(Login login);
 }

@@ -98,20 +98,6 @@ public class UserController : ControllerBase
         }
     }
     
-    [HttpPost("Login")]
-    public Task<User> Login([FromBody] User user)
-    {
-        try
-        {
-            return _userMongoDBRepository.CreateUserAsync(user);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            throw;
-        }
-    }
-
     [HttpPut("UpdateUser/{userId}")]
     public Task<User> UpdateUser(string userId, User user)
     {
@@ -135,6 +121,17 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
+            throw;
+        }
+    }
+
+    [HttpPost("login")]
+    public Task<bool> Login(Login login){
+        try{
+            return _userMongoDBRepository.Login(login);
+        }
+        catch(Exception ex){
             _logger.LogError(ex.Message);
             throw;
         }

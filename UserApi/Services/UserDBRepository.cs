@@ -1,6 +1,8 @@
 using MongoDB.Driver;
 using MongoDB.Bson.Serialization;
 namespace UserApi.Services;
+
+using System.ComponentModel.DataAnnotations;
 using UserApi.Models;
 public class UserDBRepository : IUserDBRepository
 {
@@ -162,6 +164,28 @@ public class UserDBRepository : IUserDBRepository
                 _logger.LogWarning($"User with ID {id} not found.");
                 return false;
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw;
+        }
+    }
+
+    public async Task<bool> Login(Login login){
+        try
+        {
+            if(login == null){
+                _logger.LogWarning("");
+                throw new ArgumentNullException(nameof(login),"Login is null or was not found");
+            }
+
+            var filter = Builders<Login>.Filter.Eq("Emailaddress", login.Emailaddress);
+            var foundlogin = await _loginCollection.Find(filter).FirstOrDefaultAsync();
+            if (foundlogin != null && foundlogin.Password == login.Password){
+                return true;
+            }
+            else{return false;}
         }
         catch (Exception ex)
         {
