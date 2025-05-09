@@ -42,7 +42,12 @@ public class UserDBRepository : IUserDBRepository
                 _logger.LogWarning("Attempted to create a null user.");
                 throw new ArgumentNullException(nameof(user), "User cannot be null");
             }
-
+            if(user.EmailAddress == null || user.Password == null){
+                {
+                    _logger.LogWarning("Email or Password is null.");
+                    throw new ArgumentNullException(nameof(user),"Email or Password cannot be null");
+                
+                }
             Login login = new Login
             {
                 Emailaddress = user.EmailAddress,
