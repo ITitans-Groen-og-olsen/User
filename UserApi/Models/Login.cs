@@ -9,6 +9,6 @@ public class Login
     [BsonId]
     [BsonRepresentation(BsonType.String)]
     public Guid Id { get; set; }
-    public string? Emailaddress { get; set; }
+    public string? EmailAddress { get; set; }
     public string? Password { get; set; }
 }
