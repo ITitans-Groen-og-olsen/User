@@ -1,10 +1,10 @@
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using UserApi.Models;
-using System.Linq;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Authentication;
 using UserApi.Services;
-using System.ComponentModel;
 
 namespace UserApi.Controllers;
 
@@ -66,8 +66,6 @@ public class UserController : ControllerBase
             _logger.LogError(ex.Message);
             throw;
         }
-
-
     }
 
     [HttpGet("GetAllUsers")]
@@ -97,7 +95,7 @@ public class UserController : ControllerBase
             throw;
         }
     }
-    
+
     [HttpPut("UpdateUser/{userId}")]
     public Task<User> UpdateUser(string userId, User user)
     {
@@ -127,11 +125,14 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public Task<bool> Login(Login login){
-        try{
+    public Task<bool> Login(Login login)
+    {
+        try
+        {
             return _userMongoDBRepository.Login(login);
         }
-        catch(Exception ex){
+        catch (Exception ex)
+        {
             _logger.LogError(ex.Message);
             throw;
         }
@@ -143,8 +144,7 @@ public class UserController : ControllerBase
         var properties = new Dictionary<string, string>();
         var assembly = typeof(Program).Assembly;
         properties.Add("service", "HaaV User Service");
-        var ver = FileVersionInfo.GetVersionInfo(typeof(Program)
-        .Assembly.Location).ProductVersion;
+        var ver = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
         properties.Add("version", ver!);
         try
         {
