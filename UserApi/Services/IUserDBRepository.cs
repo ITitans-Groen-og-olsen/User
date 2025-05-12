@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UserApi.Models;
+
 namespace UserApi.Services;
+
 public interface IUserDBRepository
 {
     Task<User> CreateUserAsync(User user);
