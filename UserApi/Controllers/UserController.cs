@@ -1,10 +1,10 @@
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using UserApi.Models;
-using System.Linq;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Authentication;
 using UserApi.Services;
-using System.ComponentModel;
 
 namespace UserApi.Controllers;
 
@@ -12,20 +12,6 @@ namespace UserApi.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    /*
-    private static List<User> _users = new List<User>() {
-        new () {
-            Id = new Guid("c9fcbc4b-d2d1-4664-9079-dae78a1de446"),
-            Name = "Henrik Fisker",
-            Address1 = "Søndergade 3",
-            City = "Harboøre",
-            PostalCode = 7673,
-            EmailAddress = "hnrk@afiskbutik.dk",
-            PhoneNumber = "133466789"
-        }
-    };
-    */
-
     private readonly ILogger<UserController> _logger;
     private readonly IUserDBRepository _userMongoDBRepository;
 
@@ -66,8 +52,6 @@ public class UserController : ControllerBase
             _logger.LogError(ex.Message);
             throw;
         }
-
-
     }
 
     [HttpGet("GetAllUsers")]
@@ -86,20 +70,6 @@ public class UserController : ControllerBase
 
     [HttpPost("AddUser")]
     public Task<User> AddUser([FromBody] User user)
-    {
-        try
-        {
-            return _userMongoDBRepository.CreateUserAsync(user);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            throw;
-        }
-    }
-    
-    [HttpPost("Login")]
-    public Task<User> Login([FromBody] User user)
     {
         try
         {
@@ -140,14 +110,27 @@ public class UserController : ControllerBase
         }
     }
 
+    [HttpPost("login")]
+    public Task<bool> Login(Login login)
+    {
+        try
+        {
+            return _userMongoDBRepository.Login(login);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw;
+        }
+    }
+
     [HttpGet("version")]
     public async Task<Dictionary<string, string>> GetVersion()
     {
         var properties = new Dictionary<string, string>();
         var assembly = typeof(Program).Assembly;
         properties.Add("service", "HaaV User Service");
-        var ver = FileVersionInfo.GetVersionInfo(typeof(Program)
-        .Assembly.Location).ProductVersion;
+        var ver = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
         properties.Add("version", ver!);
         try
         {
