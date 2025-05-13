@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "User",
+  "properties": {
+    "Id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the user"
+    },
+    "CustomerNumber": {
+      "type": "integer",
+      "nullable": true
+    },
+    "FirstName": {
+      "type": "string",
+      "nullable": true
+    },
+    "LastName": {
+      "type": "string",
+      "nullable": true
+    },
+    "Address": {
+      "type": "string",
+      "nullable": true
+    },
+    "PostalCode": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 32767,
+      "description": "Short integer for postal code"
+    },
+    "City": {
+      "type": "string",
+      "nullable": true
+    },
+    "EmailAddress": {
+      "type": "string",
+      "format": "email",
+      "nullable": true
+    },
+    "PhoneNumber": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": ["Id", "EmailAddress"]
+}
