@@ -47,12 +47,12 @@ public class UserDBRepository : IUserDBRepository
                 throw new ArgumentNullException(nameof(user), "User cannot be null");
             }
 
-            Login login = new Login { Emailaddress = user.EmailAddress, Password = user.Password };
+            Login login = new Login { EmailAddress = user.EmailAddress, Password = user.Password };
 
             await _userCollection.InsertOneAsync(user);
             await _loginCollection.InsertOneAsync(login);
             _logger.LogInformation($"User with ID {user.Id} created successfully.");
-            _logger.LogInformation($"Login {login.Emailaddress} created successfully.");
+            _logger.LogInformation($"Login {login.EmailAddress} created successfully.");
             return user;
         }
         catch (Exception ex)
@@ -183,7 +183,7 @@ public class UserDBRepository : IUserDBRepository
                 throw new ArgumentNullException(nameof(login), "Login is null or was not found");
             }
 
-            var filter = Builders<Login>.Filter.Eq("Emailaddress", login.Emailaddress);
+            var filter = Builders<Login>.Filter.Eq("EmailAddress", login.EmailAddress);
             var foundlogin = await _loginCollection.Find(filter).FirstOrDefaultAsync();
             if (foundlogin != null && foundlogin.Password == login.Password)
             {
