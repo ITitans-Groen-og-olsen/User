@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserApi.Models;
 using UserApi.Services;
@@ -73,6 +74,8 @@ public class UserController : ControllerBase
     {
         try
         {
+            user.Password = _userMongoDBRepository.HashPassword(user).ToString();
+            Console.WriteLine($"Password set to: {user.Password}");
             return _userMongoDBRepository.CreateUserAsync(user);
         }
         catch (Exception ex)
@@ -111,11 +114,11 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public Task<bool> Login(Login login)
+    public Task<bool> Login(User user)
     {
         try
         {
-            return _userMongoDBRepository.Login(login);
+            return _userMongoDBRepository.Login(user);
         }
         catch (Exception ex)
         {

@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
@@ -16,20 +18,25 @@ public class UserDBRepository : IUserDBRepository
     public UserDBRepository(ILogger<UserDBRepository> logger, IConfiguration configuration)
     {
         _logger = logger;
-        var connectionString = configuration["MongoConnectionString"] ?? "<blank>";
-        var databaseName = configuration["DatabaseName"] ?? "<blank>";
-        var collectionName = configuration["CollectionName"] ?? "<blank>";
-        var collectionNameLogin = configuration["CollectionNameLogin"] ?? "<blank>";
+        var connectionString =
+            Environment.GetEnvironmentVariable("MongoConnectionString")
+            ?? configuration.GetValue<string>("MongoConnectionString");
+
+        var databaseName =
+            Environment.GetEnvironmentVariable("DatabaseName")
+            ?? configuration.GetValue<string>("DatabaseName", "UserDBEksamen");
+
+        var collectionName =
+            Environment.GetEnvironmentVariable("CollectionName")
+            ?? configuration.GetValue<string>("CollectionName", "Users");
         _logger.LogInformation($"Connected to MongoDB using: {connectionString}");
         _logger.LogInformation($" Using database: {databaseName}");
         _logger.LogInformation($" Using Collection: {collectionName}");
-        _logger.LogInformation($" Using Collection: {collectionNameLogin}");
         try
         {
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
             _userCollection = database.GetCollection<User>(collectionName);
-            _loginCollection = database.GetCollection<Login>(collectionNameLogin);
         }
         catch (Exception ex)
         {
@@ -46,13 +53,8 @@ public class UserDBRepository : IUserDBRepository
                 _logger.LogWarning("Attempted to create a null user.");
                 throw new ArgumentNullException(nameof(user), "User cannot be null");
             }
-
-            Login login = new Login { EmailAddress = user.EmailAddress, Password = user.Password };
-
             await _userCollection.InsertOneAsync(user);
-            await _loginCollection.InsertOneAsync(login);
             _logger.LogInformation($"User with ID {user.Id} created successfully.");
-            _logger.LogInformation($"Login {login.EmailAddress} created successfully.");
             return user;
         }
         catch (Exception ex)
@@ -173,19 +175,22 @@ public class UserDBRepository : IUserDBRepository
         }
     }
 
-    public async Task<bool> Login(Login login)
+    public async Task<bool> Login(User user)
     {
         try
         {
-            if (login == null)
+            if (user.Password == null || user.EmailAddress == null)
             {
-                _logger.LogWarning("");
-                throw new ArgumentNullException(nameof(login), "Login is null or was not found");
+                _logger.LogWarning("Login null or not found");
+                throw new ArgumentNullException(nameof(user), "Login is null or was not found");
             }
-
-            var filter = Builders<Login>.Filter.Eq("EmailAddress", login.EmailAddress);
-            var foundlogin = await _loginCollection.Find(filter).FirstOrDefaultAsync();
-            if (foundlogin != null && foundlogin.Password == login.Password)
+            string hashed = HashPassword(user);
+            var filter = Builders<User>.Filter.Eq("EmailAddress", user.EmailAddress);
+            var foundlogin = await _userCollection.Find(filter).FirstOrDefaultAsync();
+            Console.WriteLine(
+                $"Incoming password hashed to {hashed}. Found password is {foundlogin.Password}"
+            );
+            if (foundlogin != null && foundlogin.Password == hashed)
             {
                 return true;
             }
@@ -199,5 +204,23 @@ public class UserDBRepository : IUserDBRepository
             _logger.LogError(ex.Message);
             throw;
         }
+    }
+
+    public string HashPassword(User user)
+    {
+        string salt = "3/0D9TaEelBiIHxKfuX3ng==";
+        string hashed = Convert.ToBase64String(
+            KeyDerivation.Pbkdf2(
+                password: user.Password,
+                salt: Convert.FromBase64String(salt),
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8
+            )
+        );
+        Console.WriteLine(
+            $"Hashing was called and produced: {hashed} using password {user.Password}"
+        );
+        return hashed;
     }
 }
