@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using UserApi.Models;
 
 namespace UserApi.Services;
@@ -12,6 +13,6 @@ public interface IUserDBRepository
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<User> UpdateUserAsync(string id, User updatedUser);
     Task<bool> DeleteUserAsync(string id);
-    Task<bool> Login(User user);
-    string HashPassword(User user);
+    Task<IActionResult> Login(Login login);
+    string HashPassword(Login login);
 }

@@ -74,7 +74,11 @@ public class UserController : ControllerBase
     {
         try
         {
-            user.Password = _userMongoDBRepository.HashPassword(user).ToString();
+            Login login = new();
+            login.EmailAddress = user.EmailAddress;
+            login.Password = user.Password;
+
+            user.Password = _userMongoDBRepository.HashPassword(login).ToString();
             Console.WriteLine($"Password set to: {user.Password}");
             return _userMongoDBRepository.CreateUserAsync(user);
         }
@@ -114,11 +118,11 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public Task<bool> Login(User user)
+    public Task<IActionResult> Login(Login login)
     {
         try
         {
-            return _userMongoDBRepository.Login(user);
+            return _userMongoDBRepository.Login(login);
         }
         catch (Exception ex)
         {

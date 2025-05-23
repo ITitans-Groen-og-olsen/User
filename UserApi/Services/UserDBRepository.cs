@@ -6,6 +6,8 @@ using MongoDB.Driver;
 namespace UserApi.Services;
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using UserApi.Models;
 
 public class UserDBRepository : IUserDBRepository
@@ -175,28 +177,30 @@ public class UserDBRepository : IUserDBRepository
         }
     }
 
-    public async Task<bool> Login(User user)
+    public async Task<IActionResult> Login(Login login)
     {
         try
         {
-            if (user.Password == null || user.EmailAddress == null)
+            if (login.Password == null || login.EmailAddress == null)
             {
                 _logger.LogWarning("Login null or not found");
-                throw new ArgumentNullException(nameof(user), "Login is null or was not found");
+                throw new ArgumentNullException(nameof(login), "Login is null or was not found");
             }
-            string hashed = HashPassword(user);
-            var filter = Builders<User>.Filter.Eq("EmailAddress", user.EmailAddress);
-            var foundlogin = await _userCollection.Find(filter).FirstOrDefaultAsync();
+            string hashed = HashPassword(login);
+            var filter = Builders<User>.Filter.Eq("EmailAddress", login.EmailAddress);
+            var foundUser = await _userCollection.Find(filter).FirstOrDefaultAsync();
             Console.WriteLine(
-                $"Incoming password hashed to {hashed}. Found password is {foundlogin.Password}"
+                $"Incoming password hashed to {hashed}. Found password is {foundUser.Password}"
             );
-            if (foundlogin != null && foundlogin.Password == hashed)
+            if (foundUser != null && foundUser.Password == hashed)
             {
-                return true;
+                var response = new { loginResult = "true", id = foundUser.Id };
+
+                return new OkObjectResult(response);
             }
             else
             {
-                return false;
+                throw new ArgumentException(nameof(login), "Wrong password");
             }
         }
         catch (Exception ex)
@@ -206,12 +210,12 @@ public class UserDBRepository : IUserDBRepository
         }
     }
 
-    public string HashPassword(User user)
+    public string HashPassword(Login login)
     {
         string salt = "3/0D9TaEelBiIHxKfuX3ng==";
         string hashed = Convert.ToBase64String(
             KeyDerivation.Pbkdf2(
-                password: user.Password,
+                password: login.Password,
                 salt: Convert.FromBase64String(salt),
                 prf: KeyDerivationPrf.HMACSHA256,
                 iterationCount: 100000,
@@ -219,7 +223,7 @@ public class UserDBRepository : IUserDBRepository
             )
         );
         Console.WriteLine(
-            $"Hashing was called and produced: {hashed} using password {user.Password}"
+            $"Hashing was called and produced: {hashed} using password {login.Password}"
         );
         return hashed;
     }
