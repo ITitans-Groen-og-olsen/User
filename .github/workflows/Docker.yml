@@ -17,7 +17,7 @@ jobs:
       id-token: write
     env:
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      IMAGE_NAME: User-service
+      IMAGE_NAME: user-service
       IMAGE_VERSION: 0.1.0
 
     steps:
