@@ -55,6 +55,16 @@ public class UserDBRepository : IUserDBRepository
                 _logger.LogWarning("Attempted to create a null user.");
                 throw new ArgumentNullException(nameof(user), "User cannot be null");
             }
+            var filter = Builders<User>.Filter.Empty;
+            var foundUser = await _userCollection
+                .Find(filter)
+                .SortByDescending(u => u.CustomerNumber)
+                .FirstOrDefaultAsync();
+            Console.WriteLine(
+                $"Customernumber: {user.CustomerNumber} replaced with Customernumver{foundUser.CustomerNumber}"
+            );
+            user.CustomerNumber = foundUser.CustomerNumber + 1;
+            Console.WriteLine($"New customer number set to {user.CustomerNumber}");
             await _userCollection.InsertOneAsync(user);
             _logger.LogInformation($"User with ID {user.Id} created successfully.");
             return user;
@@ -186,6 +196,7 @@ public class UserDBRepository : IUserDBRepository
                 _logger.LogWarning("Login null or not found");
                 throw new ArgumentNullException(nameof(login), "Login is null or was not found");
             }
+            Response response = new();
             string hashed = HashPassword(login);
             var filter = Builders<User>.Filter.Eq("EmailAddress", login.EmailAddress);
             var foundUser = await _userCollection.Find(filter).FirstOrDefaultAsync();
@@ -194,13 +205,16 @@ public class UserDBRepository : IUserDBRepository
             );
             if (foundUser != null && foundUser.Password == hashed)
             {
-                var response = new { loginResult = "true", id = foundUser.Id };
+                response.id = foundUser.Id.ToString();
+                response.loginResult = "true";
 
                 return new OkObjectResult(response);
             }
             else
             {
-                throw new ArgumentException(nameof(login), "Wrong password");
+                response.id = "";
+                response.loginResult = "false";
+                return new OkObjectResult(response);
             }
         }
         catch (Exception ex)
@@ -227,4 +241,10 @@ public class UserDBRepository : IUserDBRepository
         );
         return hashed;
     }
+}
+
+public class Response
+{
+    public string id { get; set; }
+    public string loginResult { get; set; }
 }
