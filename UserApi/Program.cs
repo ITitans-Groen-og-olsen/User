@@ -2,9 +2,10 @@ using UserApi.Services;
 using NLog;
 using NLog.Web;
 
-var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings()
-    .GetCurrentClassLogger();
+var logger = LogManager.Setup().LoadConfigurationFromFile("NLog.config").GetCurrentClassLogger();
 logger.Debug("Start my service");
+logger.Info("Hello world from user-service!");
+
 
 try
 {
