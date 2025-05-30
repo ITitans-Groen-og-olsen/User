@@ -27,20 +27,6 @@ public class UserController : ControllerBase
         _logger.LogInformation(1, $"XYZ Service responding from {_ipaddr}");
     }
 
-    [HttpPost(Name = "posttest")]
-    public Task<User> test([FromBody] User user)
-    {
-        try
-        {
-            return _userMongoDBRepository.GetUserByIdAsync(user.Id.ToString());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            throw;
-        }
-    }
-
     [HttpGet("GetUserById/{userId}")]
     public Task<User> Get(string userId)
     {
@@ -136,7 +122,7 @@ public class UserController : ControllerBase
     {
         var properties = new Dictionary<string, string>();
         var assembly = typeof(Program).Assembly;
-        properties.Add("service", "HaaV User Service");
+        properties.Add("service", "User Service");
         var ver = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
         properties.Add("version", ver!);
         try
