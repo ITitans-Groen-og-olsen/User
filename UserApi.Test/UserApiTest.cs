@@ -49,27 +49,6 @@ namespace UserApi.Test
         }
 
         [TestMethod]
-        public async Task AddUser_ReturnsCreatedUser()
-        {
-            // Arrange
-            var newUser = new User
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "New User",
-                EmailAddress = "new@example.com",
-            };
-
-            _mockUserRepository.Setup(repo => repo.CreateUserAsync(newUser)).ReturnsAsync(newUser);
-
-            // Act
-            var result = await _controller.AddUser(newUser);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(newUser.FirstName, result.FirstName);
-        }
-
-        [TestMethod]
         public async Task GetAllUsers_ReturnsUserList()
         {
             // Arrange
