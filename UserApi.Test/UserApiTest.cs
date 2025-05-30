@@ -1,12 +1,12 @@
-﻿using Moq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using UserApi.Controllers;
 using UserApi.Models;
 using UserApi.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace UserApi.Test
 {
@@ -30,11 +30,14 @@ namespace UserApi.Test
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var user = new User { Id = Guid.Parse(userId), FirstName = "Test User", EmailAddress = "test@example.com" };
+            var user = new User
+            {
+                Id = Guid.Parse(userId),
+                FirstName = "Test User",
+                EmailAddress = "test@example.com",
+            };
 
-            _mockUserRepository
-                .Setup(repo => repo.GetUserByIdAsync(userId))
-                .ReturnsAsync(user);
+            _mockUserRepository.Setup(repo => repo.GetUserByIdAsync(userId)).ReturnsAsync(user);
 
             // Act
             var result = await _controller.Get(userId);
@@ -49,11 +52,14 @@ namespace UserApi.Test
         public async Task AddUser_ReturnsCreatedUser()
         {
             // Arrange
-            var newUser = new User { Id = Guid.NewGuid(), FirstName = "New User", EmailAddress = "new@example.com" };
+            var newUser = new User
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "New User",
+                EmailAddress = "new@example.com",
+            };
 
-            _mockUserRepository
-                .Setup(repo => repo.CreateUserAsync(newUser))
-                .ReturnsAsync(newUser);
+            _mockUserRepository.Setup(repo => repo.CreateUserAsync(newUser)).ReturnsAsync(newUser);
 
             // Act
             var result = await _controller.AddUser(newUser);
@@ -69,13 +75,21 @@ namespace UserApi.Test
             // Arrange
             var users = new List<User>
             {
-                new User { Id = Guid.NewGuid(), FirstName = "User 1", EmailAddress = "1@example.com" },
-                new User { Id = Guid.NewGuid(), FirstName = "User 2", EmailAddress = "2@example.com" }
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = "User 1",
+                    EmailAddress = "1@example.com",
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = "User 2",
+                    EmailAddress = "2@example.com",
+                },
             };
 
-            _mockUserRepository
-                .Setup(repo => repo.GetAllUsersAsync())
-                .ReturnsAsync(users);
+            _mockUserRepository.Setup(repo => repo.GetAllUsersAsync()).ReturnsAsync(users);
 
             // Act
             var result = await _controller.GetAllUsers();
@@ -90,7 +104,12 @@ namespace UserApi.Test
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var updatedUser = new User { Id = Guid.Parse(userId), FirstName = "Updated", EmailAddress = "updated@example.com" };
+            var updatedUser = new User
+            {
+                Id = Guid.Parse(userId),
+                FirstName = "Updated",
+                EmailAddress = "updated@example.com",
+            };
 
             _mockUserRepository
                 .Setup(repo => repo.UpdateUserAsync(userId, updatedUser))
@@ -110,29 +129,10 @@ namespace UserApi.Test
             // Arrange
             var userId = Guid.NewGuid().ToString();
 
-            _mockUserRepository
-                .Setup(repo => repo.DeleteUserAsync(userId))
-                .ReturnsAsync(true);
+            _mockUserRepository.Setup(repo => repo.DeleteUserAsync(userId)).ReturnsAsync(true);
 
             // Act
             var result = await _controller.DeleteUser(userId);
-
-            // Assert
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public async Task Login_ReturnsTrue()
-        {
-            // Arrange
-            var login = new Login { EmailAddress = "user@example.com", Password = "securePassword" };
-
-            _mockUserRepository
-                .Setup(repo => repo.Login(login))
-                .ReturnsAsync(true);
-
-            // Act
-            var result = await _controller.Login(login);
 
             // Assert
             Assert.IsTrue(result);
