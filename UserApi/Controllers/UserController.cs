@@ -16,6 +16,7 @@ public class UserController : ControllerBase
     private readonly ILogger<UserController> _logger;
     private readonly IUserDBRepository _userMongoDBRepository;
 
+    // Constructer for user controller
     public UserController(ILogger<UserController> logger, IUserDBRepository userDBRepository)
     {
         _logger = logger;
@@ -27,20 +28,7 @@ public class UserController : ControllerBase
         _logger.LogInformation(1, $"XYZ Service responding from {_ipaddr}");
     }
 
-    [HttpPost(Name = "posttest")]
-    public Task<User> test([FromBody] User user)
-    {
-        try
-        {
-            return _userMongoDBRepository.GetUserByIdAsync(user.Id.ToString());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            throw;
-        }
-    }
-
+    //Fetches specific user based on id
     [HttpGet("GetUserById/{userId}")]
     public Task<User> Get(string userId)
     {
@@ -55,6 +43,7 @@ public class UserController : ControllerBase
         }
     }
 
+    // Fetches all users in database
     [HttpGet("GetAllUsers")]
     public Task<IEnumerable<User>> GetAllUsers()
     {
@@ -69,6 +58,7 @@ public class UserController : ControllerBase
         }
     }
 
+    // Adds a user to the database
     [HttpPost("AddUser")]
     public Task<User> AddUser([FromBody] User user)
     {
@@ -89,6 +79,7 @@ public class UserController : ControllerBase
         }
     }
 
+    // Updates existing user with data from incoming user
     [HttpPut("UpdateUser/{userId}")]
     public Task<User> UpdateUser(string userId, User user)
     {
@@ -103,6 +94,7 @@ public class UserController : ControllerBase
         }
     }
 
+    // Deletes user based on given id
     [HttpDelete("DeleteUser/{userId}")]
     public Task<bool> DeleteUser(string userId)
     {
@@ -117,6 +109,7 @@ public class UserController : ControllerBase
         }
     }
 
+    // Accepts login info and returns authorized/unauthorized based on validity of credentials
     [HttpPost("login")]
     public Task<IActionResult> Login(Login login)
     {
@@ -136,7 +129,7 @@ public class UserController : ControllerBase
     {
         var properties = new Dictionary<string, string>();
         var assembly = typeof(Program).Assembly;
-        properties.Add("service", "HaaV User Service");
+        properties.Add("service", "User Service");
         var ver = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
         properties.Add("version", ver!);
         try
